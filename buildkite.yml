@@ -1,0 +1,36 @@
+env:
+  FORCE_COLOR: '3'
+  # Bump Node.js memory to prevent OOM crashes
+  NODE_OPTIONS: --max_old_space_size=4096
+
+template:
+  - &asdf_cache_plugin
+    https://github.com/nxpkg/asdf-cache-buildkite-plugin.git#main:
+      bucket_name: 'nxpkg_buildkite_cache'
+      region_name: 'us-central1'
+
+steps:
+  - command: |-
+      yarn
+      yarn prettier-check
+    label: ':prettier:'
+    plugins:
+      - *asdf_cache_plugin
+
+  - command: ./check_dependent.sh
+    label: ':eslint:'
+    branches: '!master'
+    plugins:
+      - *asdf_cache_plugin
+
+  - wait
+
+  - command: |-
+      yarn
+      yarn run semantic-release
+    branches: master
+    label: ':npm:'
+    concurrency: 1
+    concurrency_group: release
+    plugins:
+      - *asdf_cache_plugin

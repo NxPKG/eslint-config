@@ -1,0 +1,5 @@
+{
+  "extends": ["github>nxpkg/renovate-config"],
+  "semanticCommits": true,
+  "reviewers": ["team:web"]
+}
